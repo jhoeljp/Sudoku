@@ -29,12 +29,16 @@ def load_board(file):
 def get_options(board,x_1,y_1,x_2,y_2):
     # print(x_1,y_1,x_2,y_2)
     total_options = ['1','2','3','4','5','6','7','8','9']
+    empty_slots = []
     for i in range(x_1,y_1):
         for j in range(x_2,y_2):
             # print(board[i][j])
             if board[i][j] in total_options:
                 total_options.remove(board[i][j])
-    return total_options
+            #record empty location coordinates
+            if board[i][j] == '0':
+                empty_slots.append((i,j))
+    return total_options,empty_slots
 
 def get_sides(board,pos_x,EDGE_1,EDGE_2):
     #check horizontal
@@ -59,15 +63,22 @@ def backtrack(squares,pos_x,pos_y):
     for key in squares.keys():
         if key == "1":
             options = []
+            empty = []
+
             x_1, y_1, x_2, y_2 = squares[key]
             #options available for squares
-            options = get_options(board,x_1,y_1,x_2,y_2)
-            #check perpendicular sides - horizontal and vertical
-            hor, ver = get_sides(board,pos_x,EDGE_1,EDGE_2)
+            options,empty = get_options(board,x_1,y_1,x_2,y_2)
+
             #exhast options 1 by 1 a.k.a backtrack to right sol
-            for attempt in options:
-                #if attempt not in hor or ver keep going
-                valid = check_sides(hor,ver,attempt)
+            for x_coor,y_coor in empty:
+                #check perpendicular sides - horizontal and vertical
+                hor, ver = get_sides(board,x_coor,EDGE_1,EDGE_2)
+                print(hor)
+                # print(ver)
+
+            # for attempt in options:
+            #     #if attempt not in hor or ver keep going
+            #     valid = check_sides(hor,ver,attempt)
 
             #replace '0'
 
