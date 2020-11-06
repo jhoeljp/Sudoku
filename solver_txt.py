@@ -1,6 +1,6 @@
 #Sudoku solver -- Text based
 import sys,os
-
+import time
 
 #load txt sudoku
 def load_board(file):
@@ -40,47 +40,66 @@ def get_options(board,x_1,y_1,x_2,y_2):
                 empty_slots.append((i,j))
     return total_options,empty_slots
 
-def get_sides(board,pos_x,EDGE_1,EDGE_2):
+def get_sides(board,pos_x,pos_y,EDGE_1,EDGE_2):
     #check horizontal
     hor = board[pos_x][EDGE_1:EDGE_2]
     #check vertical
     ver = []
     for i in range(EDGE_2):
         # print("%d , %d --> %s"%(pos_x,i,board[pos_x][i]))
-        ver.append(board[i][pos_x])
+        # print("board [%d][%d]" %(i,pos_y))
+        ver.append(board[i][pos_y])
     return hor,ver
 
 def check_sides(hor,ver,option):
 
     return True
-def backtrack(squares,pos_x,pos_y):
+def board_print(board):
+    for line in board:
+        print(line)
+def backtrack(squares,pos_x,pos_y,board):
     EDGE_1 = 0
     EDGE_2 = 9
+    EMPTY = '0'
 
-    if pos_x ==9 and pos_y==9:
+    if pos_x ==8 and pos_y==8:
         return board
     #solve from top to bottom
     for key in squares.keys():
-        if key == "1":
-            options = []
-            empty = []
+        # if key == "1":
+        options = []
+        empty = []
 
-            x_1, y_1, x_2, y_2 = squares[key]
-            #options available for squares
-            options,empty = get_options(board,x_1,y_1,x_2,y_2)
-
-            #exhast options 1 by 1 a.k.a backtrack to right sol
-            for x_coor,y_coor in empty:
-                #check perpendicular sides - horizontal and vertical
-                hor, ver = get_sides(board,x_coor,EDGE_1,EDGE_2)
-                print(hor)
-                # print(ver)
+        x_1, y_1, x_2, y_2 = squares[key]
+        #options available for squares
+        options,empty = get_options(board,x_1,y_1,x_2,y_2)
+        # print(options)
+        #exhast options 1 by 1 a.k.a backtrack to right sol
+        for x_coor,y_coor in empty:
+            # print("(%s,%s)"%(x_coor,y_coor))
+            #check perpendicular sides - horizontal and vertical
+            hor, ver = get_sides(board,x_coor,y_coor,EDGE_1,EDGE_2)
+            #chose empty slot and replace with available option
+            for opt in options:
+                if (opt not in hor) and (opt not in ver):
+                    board[x_coor][y_coor]=opt
+                    print("option %s @ (%s,%s)" %(opt,x_coor,y_coor))
+                    print(hor)
+                    print(ver)
+                    print("-----------")
+                    # time.sleep(10)
+                    board_print(board)
+                    #recurse to next
+                    backtrack(squares,x_coor,y_coor,board)
+                    #try next option if recursion returns
+                    board[x_coor][y_coor]= EMPTY
 
             # for attempt in options:
             #     #if attempt not in hor or ver keep going
             #     valid = check_sides(hor,ver,attempt)
 
             #replace '0'
+    return board
 
 #backtracking solver
 def solve(board):
@@ -89,9 +108,10 @@ def solve(board):
     "4":(3,6,0,3),"5":(3,6,3,6),"6":(3,6,6,9),
     "7":(6,9,0,3),"8":(6,9,3,6),"9":(6,9,6,9)}
 
-    new_board = backtrack(squares,0,0)
+    new_board = backtrack(squares,0,0,board)
 
 
 board = load_board("sudoku1.txt")
 # print(board)
-solve(board)
+board = solve(board)
+print(board)
