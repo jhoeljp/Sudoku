@@ -55,49 +55,49 @@ def board_print(board):
     for line in board:
         print(line)
 
-def backtrack(squares,pos_x,pos_y,board):
-    EDGE_1 = 0
-    EDGE_2 = 9
-    EMPTY = '0'
-
-    if pos_x ==8 and pos_y==8:
-        return board
-    #solve from top to bottom
-    for key in squares.keys():
-        # if key == "1":
-        options = []
-        empty = []
-
-        x_1, y_1, x_2, y_2 = squares[key]
-        #options available for squares
-        options,empty = get_options(board,x_1,y_1,x_2,y_2)
-        # print(options)
-        #exhast options 1 by 1 a.k.a backtrack to right sol
-        for x_coor,y_coor in empty:
-            # print("(%s,%s)"%(x_coor,y_coor))
-            #check perpendicular sides - horizontal and vertical
-            hor, ver = get_sides(board,x_coor,y_coor,EDGE_1,EDGE_2)
-            #chose empty slot and replace with available option
-            for opt in options:
-                if (opt not in hor) and (opt not in ver):
-                    board[x_coor][y_coor]=opt
-                    print("option %s @ (%s,%s)" %(opt,x_coor,y_coor))
-                    print(hor)
-                    print(ver)
-                    print("-----------")
-                    # time.sleep(10)
-                    board_print(board)
-                    #recurse to next
-                    backtrack(squares,x_coor,y_coor,board)
-                    #try next option if recursion returns
-                    board[x_coor][y_coor]= EMPTY
-
-            # for attempt in options:
-            #     #if attempt not in hor or ver keep going
-            #     valid = check_sides(hor,ver,attempt)
-
-            #replace '0'
-    return board
+# def backtrack(squares,pos_x,pos_y,board):
+#     EDGE_1 = 0
+#     EDGE_2 = 9
+#     EMPTY = '0'
+#
+#     if pos_x ==8 and pos_y==8:
+#         return board
+#     #solve from top to bottom
+#     for key in squares.keys():
+#         # if key == "1":
+#         options = []
+#         empty = []
+#
+#         x_1, y_1, x_2, y_2 = squares[key]
+#         #options available for squares
+#         options,empty = get_options(board,x_1,y_1,x_2,y_2)
+#         # print(options)
+#         #exhast options 1 by 1 a.k.a backtrack to right sol
+#         for x_coor,y_coor in empty:
+#             # print("(%s,%s)"%(x_coor,y_coor))
+#             #check perpendicular sides - horizontal and vertical
+#             hor, ver = get_sides(board,x_coor,y_coor,EDGE_1,EDGE_2)
+#             #chose empty slot and replace with available option
+#             for opt in options:
+#                 if (opt not in hor) and (opt not in ver):
+#                     board[x_coor][y_coor]=opt
+#                     print("option %s @ (%s,%s)" %(opt,x_coor,y_coor))
+#                     print(hor)
+#                     print(ver)
+#                     print("-----------")
+#                     # time.sleep(10)
+#                     board_print(board)
+#                     #recurse to next
+#                     backtrack(squares,x_coor,y_coor,board)
+#                     #try next option if recursion returns
+#                     board[x_coor][y_coor]= EMPTY
+#
+#             # for attempt in options:
+#             #     #if attempt not in hor or ver keep going
+#             #     valid = check_sides(hor,ver,attempt)
+#
+#             #replace '0'
+#     return board
 
 def options2(hor,ver):
     total_options = ['1','2','3','4','5','6','7','8','9']
@@ -108,15 +108,22 @@ def options2(hor,ver):
     return options
 
 def backtrack2(squares,pos_x,pos_y,board):
+    old_board = board
     EDGE_1 = 0
     EDGE_2 = 9
     EMPTY = '0'
+    STEPS = []
 
     if pos_x ==8 and pos_y==8:
         return board
     #solve from top to bottom & left to right
     for i in range(EDGE_2):
+        if i == 0:
+            i = pos_x
         for j in range(EDGE_2):
+            if j == 0:
+                j=pos_y
+
             #empty slot found
             if board[i][j] == '0':
                 #try filling empty slot
@@ -124,24 +131,36 @@ def backtrack2(squares,pos_x,pos_y,board):
                 hor, ver = get_sides(board,i,j,EDGE_1,EDGE_2)
                 #get possible options
                 options = options2(hor,ver)
+                # print(options)
 
                 #if empty and not available options, backtrack
-                if options == [] and i !=8 and j != 8:
-                    break
+                if options == []:
+                    # print("No options available for (%d,%d)" %(i,j))
+                    # last_i, last_j = STEPS.pop()
+                    return False
                 for opt in options:
                     #attempt to replace empty slot w/ possible options
                     board[i][j] = opt
-                    # print("option %s @ (%s,%s)" %(opt,x_coor,y_coor))
-                    # print(hor)
-                    # print(ver)
+                    # print(options)
+                    # print("option %s @ (%s,%s)" %(opt,i,j))
+                    # board_print(board)
                     # time.sleep(10)
-                    board_print(board)
-                    #recurse to next
-                    backtrack(squares,i,j,board)
-                    #try next option if recursion returns
-                    board[x_coor][y_coor]= EMPTY
 
-    return board
+                    #recurse to next
+                    # STEPS.append((i,j))
+                    solved = backtrack2(squares,i,j,board)
+                    #undo bad step
+                    print("Back @ (%d,%d)" % (i,j))
+                    board[i][j]= EMPTY
+                    #remove wrong solution
+                    options.remove(opt)
+
+                    if options == []:
+                        # print("No options available for (%d,%d)" %(i,j))
+                        # last_i, last_j = STEPS.pop()
+                        return False
+
+    return True
 
 #backtracking solver
 def solve(board):
@@ -156,4 +175,4 @@ def solve(board):
 board = load_board("sudoku1.txt")
 # print(board)
 board = solve(board)
-print(board)
+board_print(board)
