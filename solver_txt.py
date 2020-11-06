@@ -55,7 +55,7 @@ def backtrack2(pos_x,pos_y,board):
     EMPTY = '0'
     STEPS = []
 
-    if pos_x ==8 and ('0' not in board[pos_x]):
+    if pos_x ==8 and (EMPTY not in board[pos_x]):
         board_print(board)
         sys.exit()
     #solve from top to bottom & left to right
@@ -63,7 +63,7 @@ def backtrack2(pos_x,pos_y,board):
         for j in range(EDGE_2):
 
             #empty slot found
-            if board[i][j] == '0':
+            if board[i][j] == EMPTY:
                 #try filling empty slot
                 #check perpendicular sides - horizontal and vertical
                 hor, ver = get_sides(board,i,j,EDGE_1,EDGE_2)
