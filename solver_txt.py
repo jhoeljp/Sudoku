@@ -51,12 +51,10 @@ def get_sides(board,pos_x,pos_y,EDGE_1,EDGE_2):
         ver.append(board[i][pos_y])
     return hor,ver
 
-def check_sides(hor,ver,option):
-
-    return True
 def board_print(board):
     for line in board:
         print(line)
+
 def backtrack(squares,pos_x,pos_y,board):
     EDGE_1 = 0
     EDGE_2 = 9
@@ -101,6 +99,50 @@ def backtrack(squares,pos_x,pos_y,board):
             #replace '0'
     return board
 
+def options2(hor,ver):
+    total_options = ['1','2','3','4','5','6','7','8','9']
+    options = []
+    for option in total_options:
+        if (option not in ver) and (option not in hor) and option!='0':
+            options.append(option)
+    return options
+
+def backtrack2(squares,pos_x,pos_y,board):
+    EDGE_1 = 0
+    EDGE_2 = 9
+    EMPTY = '0'
+
+    if pos_x ==8 and pos_y==8:
+        return board
+    #solve from top to bottom & left to right
+    for i in range(EDGE_2):
+        for j in range(EDGE_2):
+            #empty slot found
+            if board[i][j] == '0':
+                #try filling empty slot
+                #check perpendicular sides - horizontal and vertical
+                hor, ver = get_sides(board,i,j,EDGE_1,EDGE_2)
+                #get possible options
+                options = options2(hor,ver)
+
+                #if empty and not available options, backtrack
+                if options == [] and i !=8 and j != 8:
+                    break
+                for opt in options:
+                    #attempt to replace empty slot w/ possible options
+                    board[i][j] = opt
+                    # print("option %s @ (%s,%s)" %(opt,x_coor,y_coor))
+                    # print(hor)
+                    # print(ver)
+                    # time.sleep(10)
+                    board_print(board)
+                    #recurse to next
+                    backtrack(squares,i,j,board)
+                    #try next option if recursion returns
+                    board[x_coor][y_coor]= EMPTY
+
+    return board
+
 #backtracking solver
 def solve(board):
     #square coordinates
@@ -108,7 +150,7 @@ def solve(board):
     "4":(3,6,0,3),"5":(3,6,3,6),"6":(3,6,6,9),
     "7":(6,9,0,3),"8":(6,9,3,6),"9":(6,9,6,9)}
 
-    new_board = backtrack(squares,0,0,board)
+    new_board = backtrack2(squares,0,0,board)
 
 
 board = load_board("sudoku1.txt")
