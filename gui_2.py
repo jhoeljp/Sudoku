@@ -1,9 +1,3 @@
-
-#GUI imports
-import pygame, sys
-from pygame.locals import *
-
-
 #Sudoku solver -- Text based
 import sys,os
 import time
@@ -63,8 +57,7 @@ def backtrack2(pos_x,pos_y,board):
     STEPS = []
 
     if pos_x ==8 and (EMPTY not in board[pos_x]):
-        board_print(board)
-        # raise Exception("BOARD SOLVED ! ")
+        fn_board = board
         raise SystemExit
         # sys.exit()
         # return board
@@ -97,92 +90,140 @@ def backtrack2(pos_x,pos_y,board):
 
                     if options == []:
                         return board
-    return board
+    return fn_board
 
 #backtracking solver
 def solve(board):
     new_board = backtrack2(0,0,board)
     board_print(new_board)
-def main():
-    board = load_board("sudoku1.txt")
+def main(new_board):
     # print(board)
-    board = solve(board)
+    board = solve(new_board)
     board_print(board)
+    print("Board is finally solved.")
     return board
 
 try:
-    MAIN_BOARD = main()
+    OLD_board = load_board("sudoku1.txt")
+    SOLVED_board = OLD_board
+    SOLVED_board = main(SOLVED_board)
 except SystemExit:
-    board_print(MAIN_BOARD)
+    board_print(SOLVED_board)
 #end SOLVER
 
+def approximate(pos):
+    # Change the x/y screen coordinates to grid coordinates
+    col = pos[0] // (WIDTH + MARGIN)
+    row = pos[1] // (HEIGHT + MARGIN)
+    old_row, old_col = Sudoku_grid[col][row]
+    #approximate inner cell coordinates to center
+    new_row = old_row + ((WIDTH-MARGIN)/4)
+    new_col = old_col + ((HEIGHT-MARGIN)/4)
+
+    return new_row,new_col
+def approximate_pos(pos):
+    # Change the x/y screen coordinates to grid coordinates
+    col = pos[0] // (WIDTH + MARGIN)
+    row = pos[1] // (HEIGHT + MARGIN)
+
+    return row,col
+
+def draw(col,row,number):
+    font = pygame.font.SysFont(FONT, 30)
+    text = font.render(str(number), True, (0, 0, 0))
+    # DISPLAY.blit(text, (pos[0],pos[1]))
+    DISPLAY.blit(text, (col,row))
+    pygame.display.flip()
+    pygame.display.update()
+
 #GUI ----------------------------
+#GUI imports
+import pygame, sys
+from pygame.locals import *
+
+#global variables
 WIDTH = 30
 HEIGHT = 30
 WINDOW_SIZE = [320,320]
-Sudoku_N = 9
+N = 9
 MARGIN = 5
+Sudoku_grid = []
+OLD_board = load_board("sudoku1.txt")
+
+FONT = 'arial'
 
 WHITE = (255, 255, 255)
 BLACK = (0,0,0)
 
 pygame.init()
 DISPLAY = pygame.display.set_mode(WINDOW_SIZE)
-pygame.display.set_caption("Sudoku UU")
+pygame.display.set_caption("Sudoku GUI")
 
-background = pygame.Surface(DISPLAY.get_size())
-background = background.convert()
-background.fill((250, 250, 250))
+#Sudoku board
+DISPLAY.fill(BLACK)
 
-#main loop gmae
+for row in range(N):
+    color = WHITE
+    tmp_grid = []
+    for col in range(N):
+        Margin_1 =(MARGIN + WIDTH) * col + MARGIN
+        Margin_2 = (MARGIN + HEIGHT) * row + MARGIN
+        pygame.draw.rect(DISPLAY,
+                         color,
+                         [(MARGIN + WIDTH) * col + MARGIN,
+                          (MARGIN + HEIGHT) * row + MARGIN,
+                          WIDTH,
+                          HEIGHT])
+        # print("@(%d,%d) margins are %d till %d" % (row,col,Margin_1,Margin_2))
+        grid_row, grid_col = approximate_pos([Margin_1,Margin_2])
+        # print("approximate @ %d,%d" %(grid_row,grid_col))
+        if OLD_board[row][col] != '0':
+            # draw(grid_col,grid_row,OLD_board[row][col])
+            # print(OLD_board[row][col])
+            font = pygame.font.SysFont('arial', 30)
+            text = font.render(str(OLD_board[row][col]), True, (0, 0, 0))
+            # DISPLAY.blit(text, (pos[0],pos[1]))
+            DISPLAY.blit(text, (grid_col,grid_row))
+
+            pygame.display.update()
+        tmp_grid.append((Margin_1,Margin_2))
+    Sudoku_grid.append(tmp_grid)
+
+#draw board start
+# for row in range(N):
+#     color = WHITE
+#     for col in range(N):
+
+#main game loop
 while True:
     for event in pygame.event.get():
+        #QUIT
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
+        #try sudoku option
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # User clicks
             pos = pygame.mouse.get_pos()
-            # Change the x/y screen coordinates to grid coordinates
-            column = pos[0] // (WIDTH + MARGIN)
-            row = pos[1] // (HEIGHT + MARGIN)
-        #     # # Set that location to one
-        #     # grid[row][column] = 1
-            print("Click ", pos, "Grid coordinates: ", row, column)
-        #
-        # # elif event.type == pygame.MOUSEBUTTONUP:
-        #     font = pygame.font.SysFont('arial', 50)
-        #     text = font.render(str(9), True, (0, 0, 0))
-        #     DISPLAY.window.blit(text, pos)
-        #     pygame.display.update()
+            new_row, new_col = approximate(pos)
+            # print("Click ", pos, "Grid coordinates: ", row, col)
 
-            font = pygame.font.SysFont('arial', 36)
-            text = font.render("9", 1, (150, 150, 150))
-            textpos = text.get_rect()
-            textpos.centerx = background.get_rect().centerx
-            background.blit(text, textpos)
+            #draw number
+            font = pygame.font.SysFont('arial', 30)
+            text = font.render(str(1), True, (0, 0, 0))
+            # DISPLAY.blit(text, (pos[0],pos[1]))
+            DISPLAY.blit(text, (new_col,new_row))
+
+            pygame.display.update()
 
             # Blit everything to the screen
-            DISPLAY.blit(background, (0, 0))
-            pygame.display.flip()
+            # DISPLAY.blit(background, (0, 0))
+            # pygame.display.flip()
 
     # Blit everything to the screen
-    DISPLAY.blit(background, (0, 0))
-    pygame.display.flip()
+    # DISPLAY.blit(background, (0, 0))
+    # pygame.display.flip()
 
-    #sudoku board
-    DISPLAY.fill(BLACK)
-
-    for row in range(Sudoku_N):
-        color = WHITE
-        for col in range(Sudoku_N):
-            pygame.draw.rect(DISPLAY,
-                             color,
-                             [(MARGIN + WIDTH) * col + MARGIN,
-                              (MARGIN + HEIGHT) * row + MARGIN,
-                              WIDTH,
-                              HEIGHT])
-
-    DISPLAY.blit(background, (0, 0))
+    # DISPLAY.blit(background, (0, 0))
     pygame.display.flip()
     pygame.display.update()
