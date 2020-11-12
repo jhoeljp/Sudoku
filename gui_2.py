@@ -144,7 +144,7 @@ from pygame.locals import *
 #global variables
 WIDTH = 30
 HEIGHT = 30
-WINDOW_SIZE = [320,320]
+WINDOW_SIZE = [320,350]
 N = 9
 MARGIN = 5
 Sudoku_grid = []
@@ -175,24 +175,28 @@ for row in range(N):
                           WIDTH,
                           HEIGHT])
         # print("@(%d,%d) margins are %d till %d" % (row,col,Margin_1,Margin_2))
-        grid_row, grid_col = approximate_pos([Margin_1,Margin_2])
         # print("approximate @ %d,%d" %(grid_row,grid_col))
-        if OLD_board[row][col] != '0':
-            # draw(grid_col,grid_row,OLD_board[row][col])
-            # print(OLD_board[row][col])
-            font = pygame.font.SysFont('arial', 30)
-            text = font.render(str(OLD_board[row][col]), True, (0, 0, 0))
-            # DISPLAY.blit(text, (pos[0],pos[1]))
-            DISPLAY.blit(text, (grid_col,grid_row))
 
-            pygame.display.update()
         tmp_grid.append((Margin_1,Margin_2))
     Sudoku_grid.append(tmp_grid)
 
 #draw board start
-# for row in range(N):
-#     color = WHITE
-#     for col in range(N):
+for row in range(N):
+    color = WHITE
+    for col in range(N):
+        if OLD_board[row][col] != '0':
+            Margin_1 =(MARGIN + WIDTH) * col + MARGIN
+            Margin_2 = (MARGIN + HEIGHT) * row + MARGIN
+            # draw(grid_col,grid_row,OLD_board[row][col])
+            # print(OLD_board[row][col])
+            grid_row, grid_col = approximate([Margin_1,Margin_2])
+            print("%d %d" % (grid_row,grid_col))
+            font = pygame.font.SysFont('arial', 30)
+            text = font.render(str(OLD_board[row][col]), True, (0, 0, 0))
+            # DISPLAY.blit(text, (pos[0],pos[1]))
+            DISPLAY.blit(text, (grid_col,grid_row))
+        pygame.display.flip()
+        pygame.display.update()
 
 #main game loop
 while True:
