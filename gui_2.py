@@ -131,7 +131,7 @@ def approximate_pos(pos):
 
 def draw(col,row,number,draw):
     if draw:
-        font = pygame.font.SysFont(FONT, 30)
+        font = pygame.font.SysFont(FONT, 25)
         text = font.render(str(number), True, (0, 0, 0))
         # DISPLAY.blit(text, (pos[0],pos[1]))
         DISPLAY.blit(text, (col,row))
@@ -142,6 +142,19 @@ def check_solver(solved_board, attempt, pos):
     if solved_board[pos[0]][pos[1]] != attempt:
         return False
     return True
+
+def drawCircle(can):
+    color = BLACK
+    if can:
+        color = GREEN
+    else:
+        color = RED
+    pygame.draw.circle(DISPLAY, color, [20,330], 10)
+
+def play_sound(sound_wav):
+    sounds = pygame.mixer.Sound(sound_wav)
+    pygame.mixer.Sound.play(sounds)
+    pygame.mixer.music.stop()
 
 #GUI ----------------------------
 #GUI imports
@@ -154,21 +167,36 @@ HEIGHT = 30
 WINDOW_SIZE = [320,350]
 N = 9
 MARGIN = 5
-Sudoku_grid = []
 OLD_board = load_board("sudoku1.txt")
-
+#FONTS
 FONT = 'arial'
-
+#COLORS
 WHITE = (255, 255, 255)
 BLACK = (0,0,0)
+GREEN = (0,255,0)
+RED = (255,0,0)
+#SOUNDS
+nope_sound = "buzzer_x.wav"
+right_sound = "coin2.wav"
+start_sound = "bubbles.wav"
+winner = ""
+
 
 pygame.init()
 DISPLAY = pygame.display.set_mode(WINDOW_SIZE)
 pygame.display.set_caption("Sudoku GUI")
 
-#Sudoku board
+#build Sudoku board
 DISPLAY.fill(BLACK)
 
+#instructions
+font = pygame.font.SysFont(FONT, 15)
+text = font.render("1.Press number --- 2. Click box", True, (255, 255, 255))
+DISPLAY.blit(text, (40,325))
+drawCircle(True)
+
+#get board squares coordinates mapping
+Sudoku_grid = []
 for row in range(N):
     color = WHITE
     tmp_grid = []
@@ -187,28 +215,32 @@ for row in range(N):
         tmp_grid.append((Margin_1,Margin_2,True))
     Sudoku_grid.append(tmp_grid)
 
-#draw board start
+#keep track of user's plays
+# GAME_board = OLD_board
+GAME_board = SOLVED_board
+#Draw start board
 for row in range(N):
-    color = WHITE
     for col in range(N):
         #EMPTY slot in board
-        if OLD_board[row][col] != '0':
+        if GAME_board[row][col] != '0':
             Margin_1,Margin_2, can_draw = Sudoku_grid[row][col]
             grid_row, grid_col = approximate([Margin_1,Margin_2])
-            draw(grid_col,grid_row,str(OLD_board[row][col]),can_draw)
+            draw(grid_col,grid_row,str(GAME_board[row][col]),can_draw)
             #update to not editable
             Sudoku_grid[row][col] = (Margin_1,Margin_2,False)
 
 #MAIN GAME LOOP
 INPUT = 0
-#keep track of user's plays
-GAME_board = OLD_board
+play_sound(start_sound)
+time.sleep(3)
+loop = True
+#start game
+while loop:
 
-while True:
     for event in pygame.event.get():
         attempt = False
-        #QUIT
-        if event.type == QUIT:
+
+        if event.type == QUIT or not loop:
             pygame.quit()
             sys.exit()
 
@@ -237,10 +269,14 @@ while True:
             if can_draw and INPUT!=0:
                 if check_solver(SOLVED_board,str(INPUT),[new_row,new_col]):
                     draw(col,row,str(INPUT),can_draw)
+                    drawCircle(True)
+                    play_sound(right_sound)
+                    GAME_board[new_row][new_col] = str(INPUT)
                 else:
+                    drawCircle(False)
+                    play_sound(nope_sound)
                     print("%d does not go @(%d,%d)"%(INPUT,new_row,new_col))
                 INPUT = 0
 
-    # DISPLAY.blit(background, (0, 0))
     pygame.display.flip()
     pygame.display.update()
