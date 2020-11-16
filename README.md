@@ -1,7 +1,9 @@
 # Sudoku Solver
-download and use the cmd: python3 SudokuS.py
+Download ALL files to run Sudoku Solver 
 
-IF loading new board: python3 SudokuS.py new_board.txt
+USE the cmd command >> python3 SudokuS.py
+
+IF loading new board >> python3 SudokuS.py new_board.txt
 
 # System requirements
 python 3.4 or higher
