@@ -1,4 +1,4 @@
-# Sudoku Solver
+# Sudoku Solver GUI
 Download ALL files to run Sudoku Solver 
 
 USE the cmd command >> python3 SudokuS.py
